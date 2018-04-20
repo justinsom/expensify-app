@@ -21,6 +21,7 @@ const jsx = (
 );
 
 let hasRendered = false;
+store.dispatch(logout());
 const renderApp = () => {
   if (!hasRendered) {
     ReactDOM.render(jsx, document.getElementById('app'));
