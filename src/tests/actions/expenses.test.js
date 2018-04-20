@@ -3,6 +3,7 @@ import thunk from 'redux-thunk';
 import {
   startAddExpense,
   addExpense,
+  startEditExpense,
   editExpense,
   startRemoveExpense,
   removeExpense,
@@ -30,7 +31,7 @@ test('should setup remove expense action object', () => {
   });
 });
 
-test('should remove expense from database and store', (done) => {
+test('should remove expense from firebase', (done) => {
   const store = createMockStore({});
   const id = expenses[2].id;
 
@@ -60,6 +61,35 @@ test('should setup edit expense action object', () => {
       note: 'New note value'
     }
   });
+});
+
+test('should update expense in firebase', (done) => {
+  const store = createMockStore({});
+  const id = expenses[2].id;
+  const updates = {
+    description: 'Updated test description',
+    note: 'Updated test note',
+    amount: 1234,
+    createdAt: 4321
+  };
+
+  store.dispatch(startEditExpense(id, updates))
+    .then(() => {
+      const actions = store.getActions();
+      expect(actions[0]).toEqual({
+        type: 'EDIT_EXPENSE',
+        id: id,
+        updates: updates
+      });
+
+      // Check if data updated in firebase
+      return database.ref(`expenses/${id}`).once('value');
+    })
+    .then((snapshot) => {
+      expect(snapshot.val()).toEqual(updates);
+      done();
+    });
+
 });
 
 test('should setup add expense action object with provided values', () => {
